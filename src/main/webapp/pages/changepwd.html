@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Change Password</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            margin: 0 auto;
+            width: 300px;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: #ff0000;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body onload="checkCookie()">
+<h1>Change password</h1>
+<table>
+    <tr>
+        <!--[START user_input]-->
+        <td>
+            <form onsubmit="return validateForm()">
+                <label for="oldpassword">Old password* </label>
+                <input type="password" id="oldpassword" name="oldpassword" required><br>
+                <label for="password">Password* </label>
+                <input type="password" id="password" name="password" required><br>
+                <label for="confirmPassword">Confirm Password* </label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required><br>
+                <input type="submit" value="Change" onclick="changePwd(); return false;">
+            </form>
+            <div id="errorContainer" class="error"></div>
+        </td>
+    </tr>
+</table>
+<!--[END user_input]-->
+
+
+<script>
+    function validateForm() {
+        let password = document.getElementById("password").value;
+        let confirmPassword = document.getElementById("confirmPassword").value;
+
+
+        if (!/[a-z]/.test(password) || !/\d/.test(password) || !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+            alert("Password must contain at least one lowercase letter, one digit, and one punctuation mark!");
+            return false;
+
+        } else if (password.length < 8) {
+            alert("Password needs to have at least 8 characters!");
+            return false;
+        } else if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return false;
+        }
+        return true;
+    }
+
+    function changePwd() {
+        // Get form data and create a JSON object
+        if (validateForm()) {
+            authtoken = checkCookie();
+            let username = authtoken.username;
+            let tokenID = authtoken.tokenID;
+            let loginpwd = document.getElementById("oldpassword").value;
+            let pwd = document.getElementById("password").value;
+            let pwd2 = document.getElementById("confirmPassword").value;
+
+            let userData = {
+                tokenID, tokenID,
+                loginpwd: loginpwd,
+                pwd: pwd,
+                pwd2: pwd2
+
+            };
+
+            // Send JSON data as POST request to server
+            fetch('/rest/change/pwd/' , {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Handle successful response
+                        alert('Password change successful!');
+                    } else {
+                        // Handle failed response
+                        alert('Password change failed. Please try again. ');
+                    }
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error:', error);
+                });
+        }
+
+    }
+
+    function getCookie() {
+        let name = "loginToken=";
+        let ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    function checkCookie() {
+        let authToken = getCookie();
+        if (authToken != "") {
+            // Retrieve and validate the authentication token
+            authToken = JSON.parse(authToken);
+            console.log(authToken.username);
+            console.log(authToken.expirationData);
+            if (authToken.expirationData < Date.now()) {
+                // Redirect to dashboard page
+                window.location.href = "/login.html";
+            }
+            return authToken;
+        } else {
+            // Redirect to login page
+            window.location.href = "/pages/login.html";
+            return false;
+        }
+
+    }
+
+</script>
+</body>
+</html>

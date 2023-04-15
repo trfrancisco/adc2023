@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>List of users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        #errorContainer {
+            color: #f00;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body onload="populateCookieTable()">
+
+<h1>List of users</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>TokenID</th>
+        <th>Creation date</th>
+        <th>Expiration date</th>
+        <!-- Add more columns as needed -->
+    </tr>
+    </thead>
+    <tbody id="cookieTableBody">
+    <!-- Table rows will be dynamically added here using JavaScript -->
+    </tbody>
+</table>
+
+<div id="errorContainer"></div>
+
+<script>
+    function populateCookieTable() {
+        if(!checkCookie()){
+            return false;
+        }
+        let cookie = getCookie();
+        let tableBody = document.getElementById('cookieTableBody');
+        tableBody.innerHTML = ''; // Clear existing table rows
+        cookie = JSON.parse(cookie);
+        console.log(cookie.expirationData);
+        console.log(cookie);
+
+        let row = document.createElement('tr');
+
+        let cell1 = document.createElement('td');
+        cell1.textContent = cookie.username;
+        row.appendChild(cell1);
+
+        let cell2 = document.createElement('td');
+        cell2.textContent = cookie.role;
+        row.appendChild(cell2);
+
+        let cell3 = document.createElement('td');
+        cell3.textContent = cookie.tokenID;
+        row.appendChild(cell3);
+
+        let cell4 = document.createElement('td');
+        cell4.textContent = cookie.creationData;
+        row.appendChild(cell4);
+
+        let cell5 = document.createElement('td');
+        cell5.textContent = cookie.expirationData;
+        row.appendChild(cell5);
+
+
+        tableBody.appendChild(row);
+    }
+
+
+    function getCookie() {
+        let name = "loginToken=";
+        let ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    function checkCookie() {
+        let authToken = getCookie();
+        if (authToken != "") {
+            // Retrieve and validate the authentication token
+            authToken = JSON.parse(authToken);
+            console.log(authToken.username);
+            console.log(authToken.expirationData);
+            if (authToken.expirationData < Date.now()) {
+                // Redirect to dashboard page
+                window.location.href = "/login.html";
+            }
+            return true;
+
+        } else {
+            // Redirect to login page
+            window.location.href = "/pages/login.html";
+            return false;
+        }
+
+    }
+
+</script>
+</body>
+</html>

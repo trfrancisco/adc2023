@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>List of users</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            font-weight: bold;
+        }
+
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        #errorContainer {
+            color: #f00;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body onload="listUsers()">
+
+<h1>List of users</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Name</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Privacy</th>
+        <th>Landline</th>
+        <th>Phone</th>
+        <th>Job</th>
+        <th>Job local</th>
+        <th>Address</th>
+        <th>Complementary address</th>
+        <th>NIF</th>
+        <!-- Add more columns as needed -->
+    </tr>
+    </thead>
+    <tbody id="userTableBody">
+    <!-- Table rows will be dynamically added here using JavaScript -->
+    </tbody>
+</table>
+
+<div id="errorContainer"></div>
+
+<script>
+    function populateUserTable(users) {
+        let tableBody = document.getElementById('userTableBody');
+        tableBody.innerHTML = ''; // Clear existing table rows
+        let role = checkCookie().role;
+        if(role>1) {
+            users.forEach(user => {
+                let row = document.createElement('tr');
+
+                let cell13 = document.createElement('td');
+                cell13.textContent = user.username.value;
+                row.appendChild(cell13);
+
+                let cell = document.createElement('td');
+                cell.textContent = user.email.value;
+                row.appendChild(cell);
+
+                let cell2 = document.createElement('td');
+                cell2.textContent = user.name.value;
+                row.appendChild(cell2);
+
+                let cell3 = document.createElement('td');
+                cell3.textContent = user.role.value;
+                row.appendChild(cell3);
+
+                let cell4 = document.createElement('td');
+                cell4.textContent = user.status.value;
+                row.appendChild(cell4);
+
+                let cell5 = document.createElement('td');
+                cell5.textContent = user.privacy.value;
+                row.appendChild(cell5);
+
+                let cell6 = document.createElement('td');
+                cell6.textContent = user.landline.value;
+                row.appendChild(cell6);
+
+                let cell7 = document.createElement('td');
+                cell7.textContent = user.phone.value;
+                row.appendChild(cell7);
+
+                let cell8 = document.createElement('td');
+                cell8.textContent = user.job.value;
+                row.appendChild(cell8);
+
+                let cell9 = document.createElement('td');
+                cell9.textContent = user.local.value;
+                row.appendChild(cell9);
+
+                let cell10 = document.createElement('td');
+                cell10.textContent = user.address.value;
+                row.appendChild(cell10);
+
+                let cell11 = document.createElement('td');
+                cell11.textContent = user.compaddress.value;
+                row.appendChild(cell11);
+
+                let cell12 = document.createElement('td');
+                cell12.textContent = user.nif.value;
+                row.appendChild(cell12);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        else{
+            users.forEach(user => {
+                let row = document.createElement('tr');
+
+                let cell = document.createElement('td');
+                cell.textContent = user.username.value;
+                row.appendChild(cell);
+
+                let cell2 = document.createElement('td');
+                cell2.textContent = user.email.value;
+                row.appendChild(cell2);
+
+                let cell3 = document.createElement('td');
+                cell3.textContent = user.name.value;
+                row.appendChild(cell3);
+
+                tableBody.appendChild(row);
+            });
+        }
+    }
+
+    function listUsers() {
+        // Get form data and create a JSON object
+        let authtoken = checkCookie();
+        if(!authtoken)
+            return false;
+        let username = authtoken.username;
+        let tokenID = encodeURIComponent(authtoken.tokenID);
+
+        // Send JSON data as GET request to server
+        fetch('/rest/list/v1/' + username + "?token=" + tokenID, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Handle successful response
+                    alert('List users successful!');
+                    return response.json();
+                } else {
+                    // Handle failed response
+                    throw new Error('List users failed. Please try again.');
+                }
+            })
+            .then(data => {
+                // Access data from parsed JSON response and display in an alert
+                populateUserTable(data);
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error);
+                document.getElementById('errorContainer').textContent = error.message;
+            });
+    }
+
+    function getCookie() {
+        let name = "loginToken=";
+        let ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    function checkCookie() {
+        let authToken = getCookie();
+        if (authToken != "") {
+            // Retrieve and validate the authentication token
+            authToken = JSON.parse(authToken);
+            console.log(authToken.username);
+            console.log(authToken.expirationData);
+            if (authToken.expirationData < Date.now()) {
+                // Redirect to dashboard page
+                window.location.href = "/login.html";
+            }
+            return authToken;
+        } else {
+            // Redirect to login page
+            window.location.href = "/pages/login.html";
+            return false;
+        }
+
+    }
+
+</script>
+</body>
+</html>

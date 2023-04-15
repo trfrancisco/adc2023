@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Main</title>
+    <style>
+
+
+        /* Position the button to the right */
+        #logout {
+            position: fixed;
+            top: 0;
+            right: 0;
+            margin: 20px;
+            /* Add your desired button styles here */
+            padding: 10px;
+            background-color: #008080;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #008080;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h2 {
+            color: #008080;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-right: 20px;
+        }
+
+        .button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #008080;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .button:hover {
+            background-color: #006666;
+        }
+
+        #role {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body onload="displayRole()">
+<div id="container">
+    <div>
+        <h1>Welcome</h1>
+        <h2>Your Role is </h2>
+        <p id="role"></p>
+        <div class="button-container">
+            <button class="button" onclick="changePwd()">Change Password</button>
+            <button class="button" onclick="deleteUser()">Delete User</button>
+            <button class="button" onclick="listUsers()">List Users</button>
+            <button class="button" onclick="editUser()">Edit User</button>
+            <button class="button" onclick="showToken()">Show token</button>
+        </div>
+    </div>
+</div>
+
+<button id="logout" onclick="logout()">logout</button>
+
+
+<script>
+    function showToken() {
+        window.location.href = "showtoken.html";
+    }
+
+    function logout() {
+        logoutUser();
+        deleteCookie("loginToken");
+        window.location.href = "/pages/login.html";
+    }
+
+    function deleteCookie() {
+        // Set cookie expiration date to a past date
+
+        document.cookie = "loginToken" + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    }
+
+    function changePwd() {
+        window.location.href = "changepwd.html";
+    }
+
+    function deleteUser() {
+        window.location.href = "delete.html";
+    }
+
+    function listUsers() {
+        window.location.href = "list.html";
+    }
+
+    function editUser() {
+        window.location.href = "edit.html";
+    }
+
+
+    function displayRole() {
+
+
+        if (!checkCookie()){
+            //alert("olaaaa")
+            return false;}
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const role = urlParams.get("role");
+        //alert(role);
+        console.log("Role:", role);
+        var rolestring;
+        if (role == 1)
+            rolestring = "USER"
+        else if (role == 2)
+            rolestring = "GBO"
+        else if (role == 3)
+            rolestring = "GS"
+        else if (role == 4)
+            rolestring = "SU"
+
+        var outputElement = document.getElementById("role");
+        outputElement.textContent = rolestring;
+
+        checkCookie();
+
+    }
+
+    function logoutUser() {
+        let cookie = getCookie();
+        cookie = JSON.parse(cookie);
+        var tokenID = cookie.tokenID;
+        //alert('loggingout: ' + tokenID);
+        let userData = {
+            tokenID: tokenID
+        };
+
+        // Send JSON data as POST request to server
+        fetch('/rest/logout/', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Handle successful response
+                    alert('logout successful!');
+                } else {
+                    // Handle failed response
+                    alert('logout failed. Please try again. ');
+                }
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error);
+            });
+    }
+
+    function getCookie() {
+        let name = "loginToken=";
+        let ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    function checkCookie() {
+        let authToken = getCookie();
+        //alert(authToken.expirationData);
+        if (authToken != "") {
+            // Retrieve and validate the authentication token
+            authToken = JSON.parse(authToken);
+            console.log(authToken.username);
+            console.log(authToken.expirationData);
+            //alert("Welcome again " + "user: " + authToken.username + "role: " + authToken.role + "token: " + authToken.tokenID + "creation: " + authToken.creationData + "expiration: " + authToken.expirationData);
+            //alert("token: " + auth.tokenID);
+            //alert(authToken.expirationData);
+            if (authToken.expirationData < Date.now()) {
+                // Redirect to dashboard page
+                window.location.href = "/pages/login.html";
+            }
+            return true;
+        } else {
+            // Redirect to login page
+            window.location.href = "/pages/login.html";
+            return false;
+        }
+
+    }
+</script>
+</body>
+</html>

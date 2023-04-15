@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Edit</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        form {
+            width: 400px;
+            margin: 0 auto;
+        }
+
+        label,
+        input,
+        select {
+            display: block;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            margin-top: 10px;
+        }
+
+        .button {
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        td {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body onload="getUser()">
+<h1>Edit</h1>
+<table>
+    <tr>
+        <!--[START user_input]-->
+        <td>
+            <form>
+                <label for="myusername">My Username* </label>
+                <input type="text" id="myusername" name="myusername" readonly><br>
+                <label for="password">Password* </label>
+                <input type="password" id="password" name="password"><br>
+                <label for="confirmPassword">Confirm Password* </label>
+                <input type="password" id="confirmPassword" name="confirmPassword"><br>
+                <label for="email">Email* </label>
+                <input type="email" id="email" name="email"><br>
+                <label for="role">Role </label>
+                <select id="role">
+                    <option value="USER" selected>USER</option>
+                    <option value="GBO">GBO</option>
+                    <option id="gs" value="GS">GS</option>
+                    <option id="su" value="SU">SU</option>
+                </select><br>
+                <label for="status">Status </label>
+                <select id="status">
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE" selected>Inactive</option>
+                </select><br>
+                <label for="name">Name* </label>
+                <input type="text" id="name" name="name"><br>
+                <label for="landline">Landline </label>
+                <input type="text" id="landline" name="landline"><br>
+                <label for="phone">Phone </label>
+                <input type="text" id="phone" name="phone"><br>
+                <label for="privacy">Privacy </label>
+                <select id="privacy">
+                    <option value="none" selected>none</option>
+                    <option value="public">Public</option>
+                    <option value="private">Private</option>
+                </select><br>
+                <label for="job">Job </label>
+                <input type="text" id="job" name="job"><br>
+                <label for="local">Job local</label>
+                <input type="text" id="local" name="local"><br>
+                <label for="address">Address </label>
+                <input type="text" id="address" name="address"><br>
+                <label for="compaddress">Complementary address </label>
+                <input type="text" id="compaddress" name="compaddress"><br>
+                <label for="nif">NIF </label>
+                <input type="text" id="nif" name="nif"><br>
+
+                <input type="submit" value="Edit" onclick="editUser(); return false;">
+            </form>
+            <label for="username">Username* </label>
+            <input type="text" id="username" name="username">
+            <button class="button" onclick="getUser2()">search</button>
+            <br>
+        </td>
+    </tr>
+
+
+    <!--[END user_input]-->
+</table>
+
+
+<script>
+    function validateForm() {
+        let password = document.getElementById("password").value;
+        let confirmPassword = document.getElementById("confirmPassword").value;
+
+
+        if (!/[a-z]/.test(password) || !/\d/.test(password) || !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+            alert("Password must contain at least one lowercase letter, one digit, and one punctuation mark!");
+            return false;
+
+        } else if (password.length < 8) {
+            alert("Password needs to have at least 8 characters!");
+            return false;
+        } else if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return false;
+        }
+        return true;
+    }
+
+    function editUser() {
+        validateForm();
+        // Get form data and create a JSON object
+
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+        let confirmpwd = document.getElementById("confirmPassword").value;
+        let email = document.getElementById("email").value;
+        let name = document.getElementById("name").value;
+        let role = document.getElementById("role").value;
+        let status = document.getElementById("status").value;
+        let landline = document.getElementById("landline").value;
+        let phone = document.getElementById("phone").value;
+        let privacy = document.getElementById("privacy").value;
+        let job = document.getElementById("job").value;
+        let local = document.getElementById("local").value;
+        let address = document.getElementById("address").value;
+        let compaddress = document.getElementById("compaddress").value;
+        let nif = document.getElementById("nif").value;
+
+        alert("landline:" + landline + "phone:" + phone + "privacy:" + privacy + "job:" + job + "lcoal:" + local + "address:" + address + "compaddress:" + compaddress + "nif:" + nif)
+        let tokenID = checkCookie().tokenID
+
+        let userData = {
+            tokenID: tokenID,
+            username: username,
+            password: password,
+            confirmpwd: confirmpwd,
+            email: email,
+            name: name,
+            role: role,
+            status: status,
+            privacy: privacy,
+            landline: landline,
+            phone: phone,
+            job: job,
+            local: local,
+            address: address,
+            compaddress: compaddress,
+            nif: nif
+
+        };
+
+        // Send JSON data as POST request to server
+        fetch('/rest/edit/' + username, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Handle successful response
+                    alert('Edit successful!');
+                } else {
+                    // Handle failed response
+                    alert('Edit failed. Please try again. ');
+                }
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error);
+            });
+    }
+
+    function populate(data) {
+
+
+        document.getElementById("myusername").value = checkCookie().username;
+        document.getElementById("email").value = data.email.value;
+        document.getElementById("name").value = data.name.value;
+        document.getElementById("landline").value = data.landline.value;
+        document.getElementById("phone").value = data.phone.value;
+        document.getElementById("privacy").value = data.privacy.value;
+        document.getElementById("role").value = data.role.value;
+        let roleElement = data.role.value;
+        if (roleElement == 1) {
+            document.getElementById("role").value = "USER";
+            document.getElementById("role").disabled = true;
+            document.getElementById("status").disabled = true;
+        } else if (roleElement == 2) {
+            document.getElementById("role").value = "GBO";
+            document.getElementById("gs").disabled = true;
+            document.getElementById("su").disabled = true;
+            document.getElementById("role").disabled = true;
+        } else if (roleElement == 3) {
+            document.getElementById("role").value = "GS";
+            document.getElementById("role").disabled = false;
+            document.getElementById("su").disabled = true;
+
+        } else if (roleElement == 4) {
+            document.getElementById("role").value = "SU";
+            document.getElementById("role").disabled = false;
+        }
+
+
+        document.getElementById("status").value = data.status.value;
+        document.getElementById("job").value = data.job.value;
+        document.getElementById("local").value = data.local.value;
+        document.getElementById("address").value = data.address.value;
+        document.getElementById("compaddress").value = data.compaddress.value;
+        document.getElementById("nif").value = data.nif.value;
+
+    }
+
+    function populate2(u) {
+        alert('olaaaaaaaaa');
+        // if(u.role.value > checkCookie().role){
+        // return false;
+        //  }
+
+        document.getElementById("email").value = "";
+        document.getElementById("name").value = "";
+        document.getElementById("landline").value = "";
+        document.getElementById("phone").value = "";
+        document.getElementById("job").value = "";
+        document.getElementById("local").value = "";
+        document.getElementById("address").value = "";
+        document.getElementById("compaddress").value = "";
+        document.getElementById("nif").value = "";
+
+
+        document.getElementById("email").value = u.email.value;
+        document.getElementById("name").value = u.name.value;
+        document.getElementById("landline").value = u.landline.value;
+        document.getElementById("phone").value = u.phone.value;
+        document.getElementById("privacy").value = u.privacy.value;
+        document.getElementById("role").value = u.role.value;
+        let roleElement = u.role.value;
+        if (roleElement == 1) {
+            document.getElementById("role").value = "USER";
+        } else if (roleElement == 2) {
+            document.getElementById("role").value = "GBO";
+        } else if (roleElement == 3) {
+            document.getElementById("role").value = "GS";
+
+        } else if (roleElement == 4) {
+            document.getElementById("role").value = "SU";
+        }
+
+        document.getElementById("status").value = u.status.value;
+        document.getElementById("job").value = u.job.value;
+        document.getElementById("local").value = u.local.value;
+        document.getElementById("address").value = u.address.value;
+        document.getElementById("compaddress").value = u.compaddress.value;
+        document.getElementById("nif").value = u.nif.value;
+
+    }
+
+    function getUser2() {
+        // Get form data and create a JSON object
+        let auth = checkCookie();
+        let username = document.getElementById("username").value;
+        let tokenID = auth.tokenID;
+
+
+        let userData = {
+            tokenID: tokenID,
+        };
+
+        // Send JSON data as POST request to server
+        fetch('/rest/user/' + username, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('get user successful!');
+                    return response.json();
+                    // Handle successful response
+
+                } else {
+                    // Handle failed response
+                    alert('Edit failed. Please try again. ');
+                }
+            })
+            .then(data => {
+                // Access data from parsed JSON response and display in an alert
+                populate2(data);
+
+                // ... Continue displaying other properties or formatting as needed
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error);
+            });
+    }
+
+    function getUser() {
+        // Get form data and create a JSON object
+        let auth = checkCookie();
+        if(!auth)
+            return false;
+        let myusername = auth.username;
+        let tokenID = auth.tokenID;
+
+
+        let userData = {
+            tokenID: tokenID,
+        };
+
+        // Send JSON data as POST request to server
+        fetch('/rest/user/' + myusername, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Edit successful!');
+                    return response.json();
+                    // Handle successful response
+
+                } else {
+                    // Handle failed response
+                    alert('Edit failed. Please try again. ');
+                }
+            })
+            .then(data => {
+                // Access data from parsed JSON response and display in an alert
+                populate(data);
+
+                // ... Continue displaying other properties or formatting as needed
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error);
+            });
+    }
+
+
+    function getCookie() {
+        let name = "loginToken=";
+        let ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    function checkCookie() {
+        let authToken = getCookie();
+        if (authToken != "") {
+            // Retrieve and validate the authentication token
+            authToken = JSON.parse(authToken);
+            console.log(authToken.username);
+            console.log(authToken.expirationData);
+            if (authToken.expirationData < Date.now()) {
+                // Redirect to dashboard page
+                window.location.href = "/login.html";
+            }
+            return authToken;
+
+        } else {
+            // Redirect to login page
+            window.location.href = "/pages/login.html";
+            return false;
+        }
+
+    }
+
+</script>
+</body>
+</html>

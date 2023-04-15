@@ -1,26 +1,163 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-  <head>
-    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8" />
-    <title>My First Web Aoo</title>
-  </head>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
-  <body>
-    <h1>Welcome to my simple web application!</h1>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Register</title>
+  <style>
+    /* Position the button to the right */
+    #login {
+      position: fixed;
+      top: 0;
+      right: 0;
+      margin: 20px;
+      /* Add your desired button styles here */
+      padding: 10px;
+      background-color: #008080;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
 
-    <table>
-      <tr>
-        <td colspan="2" style="font-weight:bold;">Available Services:</td>        
-      </tr>
-      <tr>
-        <td><a href='/rest/utils/hello'>Say Hello!</a></td><td>(greetings)</td>
-      </tr>
-      <tr>
-        <td><a href='/rest/utils/time'>What time is it?</a></td><td>(see server time)</td>
-      </tr>
-    </table>
-  </body>
-  <footer>
-  	Copyright: FCT NOVA 2023
-  </footer>
+<body>
+<h1>Hello Google Cloud Storage!</h1>
+
+<table>
+
+  <tr>
+    <!--[START user_input]-->
+    <td>
+      <form onsubmit="return validateForm()" >
+        <label for="username">Username* </label>
+        <input type="text" id="username" name="username" required><br>
+        <label for="password">Password* </label>
+        <input type="password" id="password" name="password" required><br>
+        <label for="confirmPassword">Confirm Password* </label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required><br>
+        <label for="email">Email* </label>
+        <input type="email" id="email" name="email" required><br>
+        <label for="name">Name* </label>
+        <input type="text" id="name" name="name" required><br>
+        <label for="landline">Landline </label>
+        <input type="text" id="landline" name="landline"><br>
+        <label for="phone">Phone </label>
+        <input type="text" id="phone" name="phone"><br>
+        <label for="privacy">Privacy </label>
+        <select id="privacy">
+          <option value="none" selected>none</option>
+          <option value="public">Public</option>
+          <option value="private">Private</option>
+        </select><br>
+        <label for="job">Job </label>
+        <input type="text" id="job" name="job"><br>
+        <label for="local">Job local</label>
+        <input type="text" id="local" name="local"><br>
+        <label for="address">Address </label>
+        <input type="text" id="address" name="address"><br>
+        <label for="compaddress">Complementary address </label>
+        <input type="text" id="compaddress" name="compaddress"><br>
+        <label for="nif">NIF </label>
+        <input type="text" id="nif" name="nif"><br>
+
+        <input type="submit" value="Register" onclick="registerUser(); return false;">
+      </form>
+    </td>
+  </tr>
+
+
+  <!--[END user_input]-->
+</table>
+
+<button id="login" onclick="loginPage()">Login</button>
+
+<script>
+  function validateForm() {
+    let password = document.getElementById("password").value;
+    let confirmPassword = document.getElementById("confirmPassword").value;
+
+
+
+    if (!/[a-z]/.test(password)  || !/\d/.test(password) || !/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
+      alert("Password must contain at least one lowercase letter, one digit, and one punctuation mark!");
+      return false;
+
+    } else if (password.length < 8) {
+      alert("Password needs to have at least 8 characters!");
+      return false;
+    } else if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return false;
+    }
+    return true;
+  }
+  function registerUser() {
+    validateForm();
+    // Get form data and create a JSON object
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+    let confirmpwd = document.getElementById("confirmPassword").value;
+    let email = document.getElementById("email").value;
+    let name = document.getElementById("name").value;
+    let landline = document.getElementById("landline").value;
+    let phone = document.getElementById("phone").value;
+    let privacy = document.getElementById("privacy").value;
+    let job = document.getElementById("job").value;
+    let local = document.getElementById("local").value;
+    let address = document.getElementById("address").value;
+    let compaddress = document.getElementById("compaddress").value;
+    let nif = document.getElementById("nif").value;
+
+    alert("landline:" + landline +"phone:"+ phone+"privacy:" +privacy+"job:"+job+"lcoal:"+local+"address:"+address+"compaddress:"+compaddress+"nif:"+nif)
+
+
+    let userData = {
+      username: username,
+      password: password,
+      confirmpwd: confirmpwd,
+      email: email,
+      name: name,
+      privacy:privacy,
+      landline:landline,
+      phone:phone,
+      job:job,
+      local:local,
+      address:address,
+      compaddress:compaddress,
+      nif:nif
+
+    };
+
+    // Send JSON data as POST request to server
+    fetch('/rest/register/v1', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(userData)
+    })
+            .then(response => {
+              if (response.ok) {
+                // Handle successful response
+                alert('Registration successful!');
+              } else {
+                // Handle failed response
+                alert('Registration failed. Please try again. ' + password + " " + confirmpwd);
+              }
+            })
+            .catch(error => {
+              // Handle error
+              console.error('Error:', error);
+            });
+  }
+
+  function loginPage() {
+    window.location.href = "/pages/login.html"; // Replace with the URL of the page you want to navigate to
+  }
+
+
+</script>
+</body>
 </html>
